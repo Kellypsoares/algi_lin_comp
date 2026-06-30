@@ -37,6 +37,16 @@ Foi gerada uma matriz `A` de ordem `500 x 500` da seguinte forma:
 
 Foram testados `tau = 0.01, 0.05, 0.1, 0.2`.
 
+## Graficos
+
+As figuras abaixo foram geradas pelo arquivo `gerar_graficos.py`.
+
+![Convergencia do residuo](graficos/convergencia_residuo.png)
+
+![Convergencia do residuo relativo](graficos/convergencia_residuo_relativo.png)
+
+![Esparsidade e condicionamento](graficos/esparsidade_condicionamento.png)
+
 ## Resultados
 
 ### tau = 0.01

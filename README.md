@@ -9,6 +9,7 @@ Conjugados.
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 .venv/bin/python gradientes_conjugados.py
+.venv/bin/python gerar_graficos.py
 ```
 
 Os resultados ja calculados estao em `ESTUDO_DIRIGIDO.md`.
