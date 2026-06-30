@@ -112,9 +112,11 @@ aproximação com resíduo final pequeno para estes testes.
 
 ## Conclusão
 
-O estudo agora reproduz o exemplo `vib_string.m` da aula como caso principal. A
-comparação entre solução direta e Gradientes Conjugados mostra que o método é
-muito eficiente quando a matriz atende à condição de simetria e definida
-positiva. Quando essa condição não é satisfeita, os resultados devem ser
-interpretados com cuidado, pois a convergência não é garantida pela teoria do
-método.
+O exemplo `vib_string.m` gera matrizes simétricas em todos os casos, porém nem
+todas são definidas positivas. O método dos Gradientes Conjugados possui
+garantia teórica de convergência apenas para matrizes simétricas definidas
+positivas. Nos casos em que essa condição foi satisfeita (`k = 2π*33` e
+`k = 2π*50`), o método convergiu em poucas iterações e reproduziu a solução
+direta com alta precisão. Nos demais casos, embora o algoritmo tenha produzido
+uma aproximação e reduzido o resíduo, esses resultados devem ser interpretados
+com cautela, pois a convergência não é garantida pela teoria.

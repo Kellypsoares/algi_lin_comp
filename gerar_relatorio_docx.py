@@ -189,11 +189,14 @@ def document_xml(resultados: list[ResultadoCG]) -> str:
         paragrafo("Conclusão", "Heading1"),
         paragrafo(
             "O exemplo vib_string.m gera matrizes simétricas em todos os casos, "
-            "mas nem todas são definidas positivas. Como o método dos Gradientes "
-            "Conjugados tem garantia teórica para matrizes simétricas definidas "
-            "positivas, os casos com menor autovalor negativo devem ser "
-            "interpretados com cuidado. Nos casos k = 2π*33 e k = 2π*50, a "
-            "matriz é definida positiva e o método converge em poucas iterações."
+            "porém nem todas são definidas positivas. O método dos Gradientes "
+            "Conjugados possui garantia teórica de convergência apenas para "
+            "matrizes simétricas definidas positivas. Nos casos em que essa "
+            "condição foi satisfeita (k = 2π*33 e k = 2π*50), o método convergiu "
+            "em poucas iterações e reproduziu a solução direta com alta precisão. "
+            "Nos demais casos, embora o algoritmo tenha produzido uma aproximação "
+            "e reduzido o resíduo, esses resultados devem ser interpretados com "
+            "cautela, pois a convergência não é garantida pela teoria."
         ),
     ]
     return (
