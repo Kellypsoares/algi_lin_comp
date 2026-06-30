@@ -1,106 +1,97 @@
-"""Gera graficos para o relatorio do estudo dirigido."""
+"""Gera gráficos para o relatório do estudo dirigido."""
 
 from __future__ import annotations
 
 import os
 from pathlib import Path
 
-os.environ.setdefault("MPLCONFIGDIR", ".matplotlib_cache")
+os.environ.setdefault("MPLCONFIGDIR", str(Path(".matplotlib_cache").resolve()))
 
+import matplotlib
+
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from gradientes_conjugados import rodar_caso
+from gradientes_conjugados import ResultadoCG, run_cases
 
 
-def main() -> None:
-    n = 500
-    max_iter = 20
-    seed_base = 22915
-    taus = [0.01, 0.05, 0.1, 0.2]
-    saida = Path("graficos")
-    saida.mkdir(exist_ok=True)
+def titulo_caso(indice: int, resultado: ResultadoCG) -> str:
+    multiplicador = round(resultado.k / (2 * 3.141592653589793))
+    k_txt = "2π" if multiplicador == 1 else f"2π*{multiplicador}"
+    return f"Caso {indice}: o = {resultado.o:.1f}, k = {k_txt}"
 
-    resultados = [
-        rodar_caso(n=n, tau=tau, seed=seed_base + i, max_iter=max_iter)
-        for i, tau in enumerate(taus)
-    ]
 
+def nome_arquivo_caso(indice: int, resultado: ResultadoCG) -> str:
+    o_txt = str(resultado.o).replace(".", "p")
+    k_txt = round(resultado.k / (2 * 3.141592653589793))
+    return f"vib_string_caso_{indice}_o_{o_txt}_k_2pi_{k_txt}.png"
+
+
+def plot_results(resultados: list[ResultadoCG], pasta_saida: Path) -> list[Path]:
+    """Gera gráficos comparando solução direta, CG e resíduo por caso."""
+    pasta_saida.mkdir(exist_ok=True)
     plt.style.use("seaborn-v0_8-whitegrid")
+    arquivos: list[Path] = []
+
+    for indice, resultado in enumerate(resultados, start=1):
+        fig, (ax_sol, ax_res) = plt.subplots(2, 1, figsize=(8, 7), dpi=160)
+
+        ax_sol.plot(
+            resultado.x_grid,
+            resultado.solucao_direta,
+            label="Solução direta",
+            linewidth=2,
+        )
+        ax_sol.plot(
+            resultado.x_grid,
+            resultado.solucao_cg,
+            "--",
+            label="Gradientes Conjugados",
+            linewidth=2,
+        )
+        ax_sol.set_title(titulo_caso(indice, resultado))
+        ax_sol.set_xlabel("x")
+        ax_sol.set_ylabel("Deslocamento")
+        ax_sol.legend()
+
+        iteracoes = range(len(resultado.residuos))
+        ax_res.semilogy(iteracoes, resultado.residuos, marker="o", linewidth=1.8)
+        ax_res.set_xlabel("Iteração")
+        ax_res.set_ylabel("Norma do resíduo ||r_n||")
+        ax_res.set_title("Convergência do resíduo")
+
+        fig.tight_layout()
+        caminho = pasta_saida / nome_arquivo_caso(indice, resultado)
+        fig.savefig(caminho)
+        plt.close(fig)
+        arquivos.append(caminho)
 
     fig, ax = plt.subplots(figsize=(8, 5), dpi=160)
-    for resultado in resultados:
-        iteracoes = range(len(resultado.residuos))
+    for indice, resultado in enumerate(resultados, start=1):
         ax.semilogy(
-            iteracoes,
+            range(len(resultado.residuos)),
             resultado.residuos,
             marker="o",
             linewidth=1.8,
             markersize=4,
-            label=f"tau = {resultado.tau}",
+            label=titulo_caso(indice, resultado),
         )
-    ax.set_title("Convergencia do Metodo dos Gradientes Conjugados")
-    ax.set_xlabel("Iteracao")
-    ax.set_ylabel("Norma do residuo ||r_n||")
-    ax.set_xlim(0, max_iter)
-    ax.legend()
+    ax.set_title("Comparação das curvas de resíduo - vib_string.m")
+    ax.set_xlabel("Iteração")
+    ax.set_ylabel("Norma do resíduo ||r_n||")
+    ax.legend(fontsize=8)
     fig.tight_layout()
-    fig.savefig(saida / "convergencia_residuo.png")
+    caminho = pasta_saida / "vib_string_residuos_comparacao.png"
+    fig.savefig(caminho)
     plt.close(fig)
+    arquivos.append(caminho)
 
-    fig, ax = plt.subplots(figsize=(8, 5), dpi=160)
-    for resultado in resultados:
-        r0 = resultado.residuos[0]
-        residuos_relativos = [r / r0 for r in resultado.residuos]
-        iteracoes = range(len(residuos_relativos))
-        ax.semilogy(
-            iteracoes,
-            residuos_relativos,
-            marker="o",
-            linewidth=1.8,
-            markersize=4,
-            label=f"tau = {resultado.tau}",
-        )
-    ax.set_title("Residuo Relativo por Iteracao")
-    ax.set_xlabel("Iteracao")
-    ax.set_ylabel("Residuo relativo ||r_n|| / ||r_0||")
-    ax.set_xlim(0, max_iter)
-    ax.legend()
-    fig.tight_layout()
-    fig.savefig(saida / "convergencia_residuo_relativo.png")
-    plt.close(fig)
+    return arquivos
 
-    fig, ax1 = plt.subplots(figsize=(8, 5), dpi=160)
-    x = [str(resultado.tau) for resultado in resultados]
-    nao_zeros = [resultado.nao_zeros for resultado in resultados]
-    condicoes = [
-        resultado.condicao if resultado.condicao is not None else float("nan")
-        for resultado in resultados
-    ]
 
-    ax1.bar(x, nao_zeros, color="#4C78A8", alpha=0.8, label="Nao zeros")
-    ax1.set_xlabel("tau")
-    ax1.set_ylabel("Quantidade de elementos nao zeros", color="#4C78A8")
-    ax1.tick_params(axis="y", labelcolor="#4C78A8")
-
-    ax2 = ax1.twinx()
-    ax2.plot(
-        x,
-        condicoes,
-        color="#F58518",
-        marker="o",
-        linewidth=2,
-        label="Numero de condicao",
-    )
-    ax2.set_ylabel("Numero de condicao", color="#F58518")
-    ax2.tick_params(axis="y", labelcolor="#F58518")
-
-    ax1.set_title("Efeito de tau na Esparsidade e no Condicionamento")
-    ax1.text(3, nao_zeros[-1] * 0.84, "matriz nao SPD", ha="center", fontsize=9)
-    fig.tight_layout()
-    fig.savefig(saida / "esparsidade_condicionamento.png")
-    plt.close(fig)
-
-    for arquivo in sorted(saida.glob("*.png")):
+def main() -> None:
+    arquivos = plot_results(run_cases(), Path("graficos"))
+    for arquivo in arquivos:
         print(arquivo)
 
 
