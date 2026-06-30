@@ -15,12 +15,9 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 .venv/bin/python gradientes_conjugados.py
 .venv/bin/python gerar_graficos.py
-.venv/bin/python gerar_relatorio_pdf.py
-.venv/bin/python gerar_relatorio_docx.py
 ```
 
 Os resultados já calculados estão em `ESTUDO_DIRIGIDO.md`.
-O relatório está disponível em `relatorio_gradientes_conjugados.pdf` e
-`relatorio_gradientes_conjugados.docx`.
+O relatório está disponível em `relatorio_gradientes_conjugados.pdf`.
 
 Repositório GitHub: https://github.com/Kellypsoares/algi_lin_comp
